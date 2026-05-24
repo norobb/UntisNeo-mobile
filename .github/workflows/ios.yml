@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'zulu'
@@ -26,13 +26,15 @@ jobs:
           xcode-version: latest-stable
 
       - name: Build shared framework
-        run: ./gradlew :shared:linkReleaseFrameworkIosArm64
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :shared:linkReleaseFrameworkIosArm64
 
       - name: Build iOS App Archive
         run: |
           cd iosApp
           xcodebuild archive \
-            -workspace iosApp.xcworkspace \
+            -project iosApp.xcodeproj \
             -scheme iosApp \
             -configuration Release \
             -archivePath $PWD/build/iosApp.xcarchive \
@@ -45,11 +47,11 @@ jobs:
         run: |
           cd iosApp/build
           mkdir -p Payload
-          cp -r iosApp.xcarchive/Products/Applications/iosApp.app Payload/
+          cp -r iosApp.xcarchive/Products/Applications/*.app Payload/
           zip -r UntisNeo-iOS.ipa Payload
 
       - name: Upload IPA Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: UntisNeo-iOS-IPA
           path: iosApp/build/UntisNeo-iOS.ipa
