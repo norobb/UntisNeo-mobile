@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- U Shape Drop Shadow -->
+    <path
+        android:fillColor="#000000"
+        android:fillAlpha="0.4"
+        android:pathData="M26,22 v40 C26,78 38,90 54,90 C70,90 82,78 82,62 v-40 h-16 v40 C66,70 62,74 54,74 C46,74 42,70 42,62 v-40 z" />
+        
+    <!-- Untis Classic U -->
+    <path
+        android:fillColor="#FF6B00"
+        android:pathData="M26,20 v40 C26,76 38,88 54,88 C70,88 82,76 82,60 v-40 h-16 v40 C66,68 62,72 54,72 C46,72 42,68 42,60 v-40 z" />
+
+    <!-- NEO Badge Shadow -->
+    <path
+        android:fillColor="#000000"
+        android:fillAlpha="0.4"
+        android:pathData="M48,66 h30 a12,12 0 0 1 12,12 a12,12 0 0 1 -12,12 h-30 a12,12 0 0 1 -12,-12 a12,12 0 0 1 12,-12 z" />
+    
+    <!-- NEO Badge pill -->
+    <path
+        android:fillColor="#FF3131"
+        android:pathData="M48,64 h30 a12,12 0 0 1 12,12 a12,12 0 0 1 -12,12 h-30 a12,12 0 0 1 -12,-12 a12,12 0 0 1 12,-12 z" />
+
+    <!-- N -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.3"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round"
+        android:pathData="M47,81 v-10 l6,10 v-10" />
+
+    <!-- E -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.3"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round"
+        android:pathData="M65,71 h-6 v10 h6 M59,76 h5" />
+
+    <!-- O -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.3"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round"
+        android:pathData="M73,71 h6 v10 h-6 Z" />
+
+</vector>

@@ -1,0 +1,6 @@
+{
+  "name": "Untis Neo",
+  "description": "Moderner WebUntis Client im Nothing OS und Google Pixel Design mit Google Kalender Integration, ICS Export, Hausaufgabenverwaltung, Noten-Tracker, Message-Center und AI Hausaufgaben-Screen Chatbot.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
