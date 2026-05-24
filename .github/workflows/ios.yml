@@ -47,7 +47,7 @@ jobs:
         run: |
           cd iosApp/build
           mkdir -p Payload
-          cp -r iosApp.xcarchive/Products/Applications/iosApp.app Payload/
+          cp -r iosApp.xcarchive/Products/Applications/*.app Payload/
           zip -r UntisNeo-iOS.ipa Payload
 
       - name: Upload IPA Artifact
