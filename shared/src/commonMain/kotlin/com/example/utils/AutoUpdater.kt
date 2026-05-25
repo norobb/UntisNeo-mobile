@@ -21,7 +21,7 @@ data class UpdateInfo(
 )
 
 object AutoUpdater {
-    private const val REPO_URL = "https://api.github.com/repos/norobb/UntisNeo/releases/latest"
+    private const val REPO_URL = "https://api.github.com/repos/norobb/UntisNeo-mobile/releases/latest"
     private const val CURRENT_VERSION = "1.0.0" // Will be replaced per platform
 
     private val client = HttpClient {

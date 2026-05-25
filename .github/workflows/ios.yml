@@ -2,8 +2,8 @@ name: Build iOS IPA (Unsigned)
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -50,20 +50,19 @@ jobs:
           cd iosApp/build
           mkdir -p Payload
           cp -r iosApp.xcarchive/Products/Applications/*.app Payload/
-          zip -r UntisNeo-mobile.ipa Payload
+          zip -r UntisNeo.ipa Payload
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: UntisNeo-mobile-IPA
-          path: iosApp/build/UntisNeo-mobile.ipa
+          name: UntisNeo-iOS-IPA
+          path: iosApp/build/UntisNeo.ipa
 
       - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          name: UntisNeo Latest Build
-          files: iosApp/build/UntisNeo-mobile.ipa
-          make_latest: true
+          name: Release ${{ github.ref_name }}
+          files: iosApp/build/UntisNeo.ipa
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
