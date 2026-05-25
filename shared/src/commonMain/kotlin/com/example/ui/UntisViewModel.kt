@@ -10,6 +10,7 @@ import com.example.data.api.GeminiService
 import com.example.data.api.HomeworkResult
 import com.example.data.room.*
 import com.example.utils.NotificationHelper
+import com.example.utils.BackgroundScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -218,6 +219,14 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
         repository.saveHomeworkNotificationsEnabled(homeworkNotificationsEnabled)
         repository.saveTimetableNotificationsEnabled(timetableNotificationsEnabled)
         repository.saveHasCompletedOnboarding(hasCompletedOnboarding)
+        
+        val scheduler = BackgroundScheduler()
+        if (timetableNotificationsEnabled) {
+            scheduler.scheduleBackgroundSync()
+        } else {
+            scheduler.cancelBackgroundSync()
+        }
+        
         triggerSync()
     }
 

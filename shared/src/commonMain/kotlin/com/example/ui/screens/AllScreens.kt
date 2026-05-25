@@ -531,6 +531,9 @@ fun TimetableScreen(viewModel: UntisViewModel) {
         }
     }
 
+    var selectedDayIndex by remember { mutableStateOf(0) } // 0=Mo, 1=Tu, 2=We, 3=Th, 4=Fr
+    val days = listOf("Mo" to "Montag", "Tu" to "Dienstag", "We" to "Mittwoch", "Th" to "Donnerstag", "Fr" to "Freitag")
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -540,8 +543,8 @@ fun TimetableScreen(viewModel: UntisViewModel) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -549,15 +552,15 @@ fun TimetableScreen(viewModel: UntisViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.DateRange, contentDescription = null, tint = NothingWhite, modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Stundenplan", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = NothingWhite, fontSize = 18.sp)
+                    Icon(Icons.Default.DateRange, contentDescription = null, tint = NothingWhite, modifier = Modifier.size(24.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text("Stundenplan", fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, color = NothingWhite, fontSize = 24.sp)
                 }
                 IconButton(
                     onClick = { viewModel.triggerSync() },
-                    modifier = Modifier.background(NothingCardGray, shape = CircleShape).size(36.dp)
+                    modifier = Modifier.background(NothingCardGray, shape = CircleShape).size(42.dp)
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = null, tint = NothingWhite, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Refresh, contentDescription = null, tint = NothingWhite, modifier = Modifier.size(20.dp))
                 }
             }
 
@@ -568,7 +571,6 @@ fun TimetableScreen(viewModel: UntisViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val currentWeekStr = weeks.getOrNull(pagerState.currentPage) ?: "Woche"
-                // Calculate end-of-week (Friday = Monday + 4 days) using string manipulation on "yyyy-MM-dd"
                 val endDateStr = try {
                     val monday = LocalDate.parse(currentWeekStr)
                     val friday = monday.plus(DatePeriod(days = 4))
@@ -581,20 +583,20 @@ fun TimetableScreen(viewModel: UntisViewModel) {
 
                 Text(
                     text = displayTitle,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.SansSerif,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
                     color = NothingMutedGray,
                     modifier = Modifier.padding(start = 4.dp)
                 )
                 
                 // Indicators
                 if (weeks.size > 1) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         for (i in weeks.indices) {
                             Box(
                                 modifier = Modifier
-                                    .size(6.dp)
+                                    .size(8.dp)
                                     .background(
                                         color = if (i == pagerState.currentPage) NothingWhite else NothingCardGray,
                                         shape = CircleShape
@@ -604,12 +606,42 @@ fun TimetableScreen(viewModel: UntisViewModel) {
                     }
                 }
             }
+            
+            // Day Selector
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                days.forEachIndexed { index, day ->
+                    val isSelected = selectedDayIndex == index
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp)
+                            .height(40.dp)
+                            .background(
+                                color = if (isSelected) NothingWhite else NothingCardGray,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .clickable { selectedDayIndex = index },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = day.first,
+                            fontFamily = FontFamily.SansSerif,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isSelected) NothingBlack else NothingMutedGray,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
         } // Header End
 
         // Pager for Weeks View
         if (weeks.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(StringResources.get("Keine Stunden."), fontFamily = FontFamily.Monospace, color = NothingMutedGray)
+                Text(StringResources.get("Keine Stunden."), fontFamily = FontFamily.SansSerif, color = NothingMutedGray)
             }
         } else {
             androidx.compose.foundation.pager.HorizontalPager(
@@ -618,124 +650,97 @@ fun TimetableScreen(viewModel: UntisViewModel) {
             ) { page ->
                 val currentWeekStart = weeks.getOrNull(page) ?: return@HorizontalPager
                 val filteredLessons = lessons.filter {
-                    getMonday(it.dateStr) == currentWeekStart
-                }
+                    getMonday(it.dateStr) == currentWeekStart && it.dayOfWeek == days[selectedDayIndex].first
+                }.sortedBy { it.period }
                 
-                // Grid View
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 4.dp, vertical = 2.dp)
-                ) {
-                    // Periods Column (1 to 9)
-                    Column(
-                        modifier = Modifier
-                            .width(20.dp)
-                            .fillMaxHeight()
-                            .padding(top = 24.dp) // account for day headers
-                    ) {
-                        for (period in 1..9) {
-                            Box(
-                                modifier = Modifier.weight(1f).fillMaxWidth(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "$period",
-                                    fontFamily = FontFamily.Monospace,
-                                    fontSize = 10.sp,
-                                    color = NothingMutedGray
-                                )
-                            }
-                        }
+                if (filteredLessons.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Frei!", fontFamily = FontFamily.SansSerif, color = NothingMutedGray, fontSize = 18.sp)
                     }
-                    
-                    // Days Grid
-                    val days = listOf("Mo" to "Montag", "Tu" to "Dienstag", "We" to "Mittwoch", "Th" to "Donnerstag", "Fr" to "Freitag")
-                    
-                    days.forEach { (dayCode, dayName) ->
-                        val dayLessons = filteredLessons.filter { it.dayOfWeek == dayCode }
-                        
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                                .padding(horizontal = 2.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier.height(24.dp).fillMaxWidth(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = dayName.take(2).uppercase(),
-                                    fontFamily = FontFamily.Monospace,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = NothingWhite
-                                )
+                } else {
+                    androidx.compose.foundation.lazy.LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(filteredLessons) { lesson ->
+                            val colorFromHex = try {
+                                val hexLong = lesson.colorHex.toLongOrNull(16) ?: 0xAAAAAA
+                                Color((hexLong or 0xFF000000L).toInt())
+                            } catch (e: Exception) {
+                                NothingMutedGray
                             }
+                            val isCancelled = lesson.status == "CANCELLED"
+                            val isSubstituted = lesson.status == "SUBSTITUTION"
                             
-                            for (period in 1..9) {
-                                val lessonList = dayLessons.filter { it.period == period }
-                                val lesson = lessonList.firstOrNull() // take first if multiple (layered substitutions)
-                                
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxWidth()
-                                        .padding(vertical = 1.dp)
+                            // UntisPlus Liquid Glass Card Design
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    // Blur effect is not fully supported on all KMP targets natively without modifiers,
+                                    // so we use a translucent background to simulate "Liquid Glass"
+                                    .background(
+                                        color = if (isCancelled) Color(0x20FF0000) else colorFromHex.copy(alpha = 0.15f),
+                                        shape = RoundedCornerShape(32.dp)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (isCancelled) Color(0x50FF0000) else colorFromHex.copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(32.dp)
+                                    )
+                                    .padding(24.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    if (lesson != null) {
-                                        val colorFromHex = try {
-                                            // Parse hex color in KMP: e.g. "FF0000" -> Color(0xFFFF0000)
-                                            val hexLong = lesson.colorHex.toLongOrNull(16) ?: 0xAAAAAA
-                                            Color((hexLong or 0xFF000000L).toInt())
-                                        } catch (e: Exception) {
-                                            NothingMutedGray
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = lesson.subjectCode,
+                                            fontFamily = FontFamily.SansSerif,
+                                            fontSize = 24.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isCancelled) NothingMutedGray else NothingWhite,
+                                            textDecoration = if (isCancelled) TextDecoration.LineThrough else null
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(Icons.Default.LocationOn, contentDescription = null, tint = NothingMutedGray, modifier = Modifier.size(14.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = lesson.roomCode,
+                                                fontFamily = FontFamily.SansSerif,
+                                                fontSize = 14.sp,
+                                                color = NothingMutedGray
+                                            )
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Icon(Icons.Default.Person, contentDescription = null, tint = NothingMutedGray, modifier = Modifier.size(14.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = lesson.teacherCode,
+                                                fontFamily = FontFamily.SansSerif,
+                                                fontSize = 14.sp,
+                                                color = NothingMutedGray
+                                            )
                                         }
-                                        val isCancelled = lesson.status == "CANCELLED"
-                                        val isSubstituted = lesson.status == "SUBSTITUTION"
-
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(
-                                                    color = if (isCancelled) Color(0x30111111) else colorFromHex.copy(alpha = 0.2f),
-                                                    shape = RoundedCornerShape(4.dp)
-                                                )
-                                                .border(
-                                                    width = 1.dp,
-                                                    color = if (isCancelled) NothingRed.copy(alpha=0.5f) else colorFromHex.copy(alpha = 0.8f),
-                                                    shape = RoundedCornerShape(4.dp)
-                                                )
-                                                .padding(2.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally,
-                                                verticalArrangement = Arrangement.Center
-                                            ) {
-                                                Text(
-                                                    text = lesson.subjectCode,
-                                                    fontFamily = FontFamily.Monospace,
-                                                    fontSize = 10.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = if (isCancelled) NothingMutedGray else NothingWhite,
-                                                    textDecoration = if (isCancelled) TextDecoration.LineThrough else null,
-                                                    textAlign = TextAlign.Center,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                                Text(
-                                                    text = lesson.roomCode,
-                                                    fontFamily = FontFamily.Monospace,
-                                                    fontSize = 8.sp,
-                                                    color = if (isSubstituted) NothingRed else NothingMutedGray,
-                                                    textAlign = TextAlign.Center,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                            }
-                                        }
+                                    }
+                                    
+                                    Column(horizontalAlignment = Alignment.End) {
+                                        Text(
+                                            text = "${lesson.period}. Stunde",
+                                            fontFamily = FontFamily.SansSerif,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = NothingWhite
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = if (isCancelled) "Entfällt" else if (isSubstituted) "Vertretung" else "Regulär",
+                                            fontFamily = FontFamily.SansSerif,
+                                            fontSize = 12.sp,
+                                            color = if (isCancelled) NothingRed else if (isSubstituted) Color(0xFFFFA500) else colorFromHex
+                                        )
                                     }
                                 }
                             }
