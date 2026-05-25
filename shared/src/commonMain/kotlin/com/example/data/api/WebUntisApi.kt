@@ -7,6 +7,7 @@ import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
+import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -542,10 +543,12 @@ class WebUntisApi {
         try {
             val url = "https://$serverUrl/WebUntis/api/rest/view/v2/calendar-entry/detail?elementId=$elementId&elementType=5&endDateTime=${end.encodeURLQueryComponent()}&homeworkOption=DUE&startDateTime=${start.encodeURLQueryComponent()}"
             val response = client.get(url) {
-                header("authorization", "Bearer $jwtToken")
-                header("cookie", "JSESSIONID=$jsessionId")
-                header("accept", "application/json, text/plain, */*")
-                header("priority", "u=1, i")
+                headers {
+                    append("authorization", "Bearer $jwtToken")
+                    append("cookie", "JSESSIONID=$jsessionId")
+                    append("accept", "application/json, text/plain, */*")
+                    append("priority", "u=1, i")
+                }
             }
             if (response.status.isSuccess()) {
                 response.bodyAsText()

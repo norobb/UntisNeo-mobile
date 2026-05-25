@@ -2541,13 +2541,9 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                             onClick = {
                                 clipboard.getText()?.text?.let { text ->
                                     if(text.contains(";")) {
-                                        val result = viewModel.repository.importBackup(text)
-                                        if (result) {
-                                            println(StringResources.get("Backup erfolgreich importiert!"))
-                                            viewModel.triggerSync()
-                                        } else {
-                                            viewModel.refreshData()
-                                        }
+                                        viewModel.repository.importBackup(text)
+                                        println(StringResources.get("Backup erfolgreich importiert!"))
+                                        viewModel.triggerSync()
                                     }
                                 }
                             },
