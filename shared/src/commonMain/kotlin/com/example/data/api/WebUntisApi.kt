@@ -1,4 +1,4 @@
-package com.example.data.api
+﻿package com.example.data.api
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -24,7 +24,6 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.content
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -296,8 +295,8 @@ class WebUntisApi {
             println("WebUntisApi Exception in API: ${e.message}")
             val friendlyMsg = when {
                 e.message?.startsWith("HTTP-Fehler") == true || e.message?.startsWith("WebUntis") == true || e.message?.startsWith("Falsche Zugangsdaten") == true || e.message?.startsWith("Fehler bei Stundenplan-Abfrage") == true -> e.message!!
-                e.message?.contains("Unable to resolve host") == true || e.message?.contains("UnknownHost") == true || e.message?.contains("nodename nor servname") == true -> "Der Server ist nicht erreichbar. Bitte überprüfe die Server-Adresse und deine Internetverbindung."
-                e.message?.contains("timeout") == true || e.message?.contains("Timeout") == true -> "Verbindung zeitüberschritten. Der WebUntis-Server antwortet zurzeit nicht."
+                e.message?.contains("Unable to resolve host") == true || e.message?.contains("UnknownHost") == true || e.message?.contains("nodename nor servname") == true -> "Der Server ist nicht erreichbar. Bitte Ã¼berprÃ¼fe die Server-Adresse und deine Internetverbindung."
+                e.message?.contains("timeout") == true || e.message?.contains("Timeout") == true -> "Verbindung zeitÃ¼berschritten. Der WebUntis-Server antwortet zurzeit nicht."
                 e.message?.contains("Connection refused") == true || e.message?.contains("network") == true -> "Netzwerkfehler: ${e.message ?: "Verbindung abgebrochen"}"
                 else -> "Fehler: ${e.message ?: "Unbekannter Fehler bei der Synchronisation"}"
             }
@@ -374,3 +373,4 @@ class WebUntisApi {
         }
     }
 }
+

@@ -131,7 +131,7 @@ fun MainAppContent(viewModel: UntisViewModel) {
                 "MESSAGES" -> MessagesScreen(viewModel)
                 "CHATBOT" -> ChatbotScreen(viewModel)
                 "SETTINGS" -> SettingsScreen(viewModel)
-                "ARCADE" -> ArcadeMenuScreen(viewModel)
+                "ARCADE" -> ArcadeScreen(viewModel)
                 else -> HomeScreen(viewModel)
             }
         }

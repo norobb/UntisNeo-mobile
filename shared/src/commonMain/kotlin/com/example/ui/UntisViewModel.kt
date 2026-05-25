@@ -1,4 +1,4 @@
-﻿package com.example.ui
+package com.example.ui
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +9,7 @@ import com.example.data.UntisRepository
 import com.example.data.api.GeminiService
 import com.example.data.api.HomeworkResult
 import com.example.data.room.*
+import com.example.utils.NotificationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -343,15 +344,19 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
 
     fun sendP2pMessage(content: String) {
         if (p2pManager.connectedEndpoint.value != null) {
-            p2pManager.sendMessage(content)
+            p2pManager.sendData(content)
             viewModelScope.launch {
-                repository.sendMessage(p2pManager.connectedEndpoint.value!!.name, "P2P Sent", content)
+                repository.saveIncomingMessage(
+                    p2pManager.connectedEndpoint.value!!.name,
+                    "P2P Sent",
+                    content
+                )
             }
         }
     }
 
     // Chatbot Command with actual Gemini REST API parsing
-    fun sendChatPrompt(text: String, photo: Bitmap?) {
+    fun sendChatPrompt(text: String, photo: ByteArray?) {
         if (text.trim().isEmpty() && photo == null) return
 
         val userText = text.trim()
@@ -363,7 +368,7 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
 
         viewModelScope.launch {
             // Determine Gemini Key priority
-            val configKey = BuildConfig.GEMINI_API_KEY
+            val configKey = ""
 
             // Format dynamic contexts for Gemini
             val studentName = userInput.ifEmpty { "SchÃ¼ler" }
@@ -379,7 +384,7 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
 
             val result = GeminiService.analyzeHomework(
                 textPrompt = userText,
-                bitmap = photo,
+                bitmapBytes = photo,
                 userApiKey = geminiApiKeyInput,
                 buildConfigKey = configKey,
                 studentName = studentName,
@@ -530,7 +535,7 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
     fun exportCalendarSubscription() {
         val path = repository.exportIcsFile(lessons.value)
         if (path != null) {
-            Log.d("UntisViewModel", "Calendar ICS exported successfully to: $path")
+            println("ICS exported")
         }
     }
 }
@@ -538,7 +543,9 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
 data class ChatMessage(
     val sender: String, // "User" or "ChatBot"
     val text: String,
-    val image: Bitmap? = null,
-    val timestamp: Long = System.currentTimeMillis()
+    val image: ByteArray? = null,
+    val timestamp: Long = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
 )
+
+
 

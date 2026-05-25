@@ -424,7 +424,7 @@ fun HomeScreen(viewModel: UntisViewModel) {
                         }
                         Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = NothingMutedGray, modifier = Modifier.size(20.dp))
                     }
-                    HorizontalDivider(color = borderColor)
+                    Divider(color = borderColor)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1459,7 +1459,11 @@ fun GradesScreen(viewModel: UntisViewModel) {
                     weightSum += g.weight
                 }
             }
-            if (weightSum > 0) String.format("%.2f", sum / weightSum) else "--"
+            if (weightSum > 0) {
+                val avg = sum / weightSum
+                val rounded = (avg * 100).toInt() / 100.0
+                "${rounded}"
+            } else "--"
         }
     }
 
@@ -1878,16 +1882,24 @@ fun ChatbotScreen(viewModel: UntisViewModel) {
                             Column(modifier = Modifier.padding(12.dp)) {
                                 if (chat.image != null) {
                                     Spacer(modifier = Modifier.height(4.dp))
-                                    Image(
-                                        bitmap = chat.image.asImageBitmap(),
-                                        contentDescription = "Uploaded image",
+                                    // Image preview not available in KMP commonMain
+                                    // (ByteArray -> ImageBitmap conversion is platform-specific)
+                                    Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .heightIn(max = 180.dp)
+                                            .height(80.dp)
                                             .clip(RoundedCornerShape(12.dp))
+                                            .background(Color(0xFF1A1A1A))
                                             .border(BorderStroke(1.dp, borderColor), RoundedCornerShape(12.dp)),
-                                        contentScale = ContentScale.Crop
-                                    )
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            "📷 Bild angehängt",
+                                            color = NothingMutedGray,
+                                            fontFamily = FontFamily.Monospace,
+                                            fontSize = 12.sp
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.height(6.dp))
                                 }
                                 Text(
@@ -1939,14 +1951,15 @@ fun ChatbotScreen(viewModel: UntisViewModel) {
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    bitmap = img.asImageBitmap(),
-                    contentDescription = "Pre-send preview",
+                Box(
                     modifier = Modifier
                         .size(50.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFF1A1A1A)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("📷", fontSize = 20.sp)
+                }
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = StringResources.get("Foto angehängt und bereit zum Absenden!"),
@@ -2108,7 +2121,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         }
                     )
                     
-                    HorizontalDivider(color = borderColor)
+                    Divider(color = borderColor)
                     
                     SettingsToggleRow(
                         title = "Stock Android Theme",
@@ -2151,7 +2164,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         }
                     )
 
-                    HorizontalDivider(color = borderColor)
+                    Divider(color = borderColor)
 
                     SettingsToggleRow(
                         title = "Stundenplan-Änderungen",
@@ -2163,7 +2176,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         }
                     )
 
-                    HorizontalDivider(color = borderColor)
+                    Divider(color = borderColor)
 
                     Text(
                         text = "SIMULATOR FÜR SYSTEM-MELDUNGEN",
@@ -2264,7 +2277,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         onCheckedChange = { showComplateTeachers = it }
                     )
 
-                    HorizontalDivider(color = borderColor)
+                    Divider(color = borderColor)
 
                     SettingsToggleRow(
                         title = "Fachnamen ausschreiben",
@@ -2273,7 +2286,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         onCheckedChange = { showComplateSubjects = it }
                     )
 
-                    HorizontalDivider(color = borderColor)
+                    Divider(color = borderColor)
 
                     SettingsToggleRow(
                         title = "Fachfarben anzeigen",
@@ -2282,7 +2295,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         onCheckedChange = { useColorsOfSubject = it }
                     )
 
-                    HorizontalDivider(color = borderColor)
+                    Divider(color = borderColor)
 
                     SettingsToggleRow(
                         title = "Vertretungskennzeichnung",
@@ -2291,7 +2304,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         onCheckedChange = { representationChanges = it }
                     )
 
-                    HorizontalDivider(color = borderColor)
+                    Divider(color = borderColor)
 
                     SettingsToggleRow(
                         title = "Entfälle anzeigen",
@@ -2300,7 +2313,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         onCheckedChange = { showCancellationsState = it }
                     )
 
-                    HorizontalDivider(color = borderColor)
+                    Divider(color = borderColor)
 
                     SettingsToggleRow(
                         title = "Räume einblenden",
@@ -2309,7 +2322,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         onCheckedChange = { showClassRooms = it }
                     )
 
-                    HorizontalDivider(color = borderColor)
+                    Divider(color = borderColor)
 
                     SettingsToggleRow(
                         title = "Farben aus WebUntis",
@@ -2502,7 +2515,7 @@ fun InfoScreen(viewModel: UntisViewModel) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                HorizontalDivider(color = Color(0xFF333333))
+                Divider(color = Color(0xFF333333))
 
                 Spacer(modifier = Modifier.height(16.dp))
 
