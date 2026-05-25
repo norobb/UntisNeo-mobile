@@ -50,6 +50,12 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
     // "Mo", "Tu", "We", "Th", "Fr"
     var selectedDayOfWeek by mutableStateOf("Fr")
 
+    var isWeekView by mutableStateOf(false)
+
+    // --- School Search ---
+    var schoolSearchResults by mutableStateOf<List<com.example.data.api.SchoolSearchResult>>(emptyList())
+    var isSearchingSchool by mutableStateOf(false)
+
     // --- Loading & Sync Status ---
     var isSyncing by mutableStateOf(false)
     var syncMessage by mutableStateOf("Synchronisiert...")
@@ -208,6 +214,20 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
             }
             kotlinx.coroutines.delay(2500) // Keep visible slightly longer for reading the detailed message
             isSyncing = false
+        }
+    }
+
+    fun searchSchool(query: String) {
+        if (query.length < 3) {
+            schoolSearchResults = emptyList()
+            return
+        }
+        viewModelScope.launch {
+            isSearchingSchool = true
+            val api = com.example.data.api.WebUntisApi()
+            val results = api.searchSchool(query)
+            schoolSearchResults = results
+            isSearchingSchool = false
         }
     }
 

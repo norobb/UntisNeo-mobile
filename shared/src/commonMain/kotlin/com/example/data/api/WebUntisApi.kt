@@ -1,4 +1,4 @@
-﻿package com.example.data.api
+package com.example.data.api
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -35,6 +35,16 @@ import kotlinx.datetime.isoDayNumber
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class SchoolSearchResult(
+    val id: Int,
+    val loginName: String,
+    val displayName: String,
+    val address: String,
+    val serverUrl: String
+)
 
 class WebUntisApi {
 
@@ -370,6 +380,58 @@ class WebUntisApi {
             code.contains("la") || code.contains("l") -> "14B8A6"
             code.contains("fr") -> "F43F5E"
             else -> "C9CBCF"
+        }
+    }
+
+    suspend fun searchSchool(query: String): List<SchoolSearchResult> = withContext(Dispatchers.IO) {
+        if (query.length < 3) return@withContext emptyList()
+        try {
+            val req = buildJsonObject {
+                put("id", "1")
+                put("method", "searchSchool")
+                put("params", buildJsonObject {
+                    put("search", query)
+                })
+                put("jsonrpc", "2.0")
+            }
+            // Ensure no duplicate params/search, wait WebUntis UntisPlus sends:
+            // "params": [{"search": query}] -> array of objects
+            val req2 = buildJsonObject {
+                put("id", "1")
+                put("method", "searchSchool")
+                put("params", kotlinx.serialization.json.buildJsonArray {
+                    add(buildJsonObject { put("search", query) })
+                })
+                put("jsonrpc", "2.0")
+            }
+            
+            val response = client.post("https://mobile.webuntis.com/ms/schoolquery2") {
+                contentType(ContentType.Application.Json)
+                setBody(req2)
+            }
+            
+            val body = response.bodyAsText()
+            val json = Json.parseToJsonElement(body).jsonObject
+            val result = json["result"]?.jsonObject
+            val schoolsArray = result?.get("schools")?.jsonArray ?: return@withContext emptyList()
+            
+            val list = mutableListOf<SchoolSearchResult>()
+            for (i in 0 until schoolsArray.size) {
+                val s = schoolsArray[i].jsonObject
+                list.add(
+                    SchoolSearchResult(
+                        id = s["schoolId"]?.jsonPrimitive?.int ?: 0,
+                        loginName = s["loginName"]?.jsonPrimitive?.content ?: "",
+                        displayName = s["displayName"]?.jsonPrimitive?.content ?: "",
+                        address = s["address"]?.jsonPrimitive?.content ?: "",
+                        serverUrl = s["server"]?.jsonPrimitive?.content ?: s["serverUrl"]?.jsonPrimitive?.content ?: ""
+                    )
+                )
+            }
+            list
+        } catch (e: Exception) {
+            println("WebUntisApi searchSchool error: ${e.message}")
+            emptyList()
         }
     }
 }
