@@ -21,7 +21,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
-class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
+class UntisViewModel(val repository: UntisRepository) : ViewModel() {
 
     val p2pManager = com.example.utils.P2pManager()
 

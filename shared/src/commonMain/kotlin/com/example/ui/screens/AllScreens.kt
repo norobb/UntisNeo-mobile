@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -2540,8 +2541,13 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                             onClick = {
                                 clipboard.getText()?.text?.let { text ->
                                     if(text.contains(";")) {
-                                        viewModel.repository.importBackup(text)
-                                        viewModel.refreshData()
+                                        val result = viewModel.repository.importBackup(text)
+                                        if (result) {
+                                            println(StringResources.get("Backup erfolgreich importiert!"))
+                                            viewModel.triggerSync()
+                                        } else {
+                                            viewModel.refreshData()
+                                        }
                                     }
                                 }
                             },
@@ -2942,10 +2948,7 @@ fun SettingsSubjectsScreen(viewModel: UntisViewModel) {
                                                 currentHex = hex
                                                 viewModel.repository.saveSubjectColor(code, hex)
                                                 // Trigger a refresh of the timetable cache
-                                                viewModel.coroutineScope.launch {
-                                                    viewModel.repository.performSync()
-                                                    viewModel.refreshData()
-                                                }
+                                                viewModel.triggerSync()
                                                 showColorPicker = false
                                             }
                                     )
@@ -2953,6 +2956,25 @@ fun SettingsSubjectsScreen(viewModel: UntisViewModel) {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ListTile(title: String, subtitle: String? = null, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+    Surface(
+        color = Color.Transparent,
+        modifier = Modifier.fillMaxWidth().clickable { onClick() }
+    ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = title, tint = NothingWhite)
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(title, color = NothingWhite, fontWeight = FontWeight.Bold)
+                if (subtitle != null) {
+                    Text(subtitle, color = NothingMutedGray, fontSize = 12.sp)
                 }
             }
         }

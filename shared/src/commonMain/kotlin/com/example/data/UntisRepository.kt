@@ -208,10 +208,10 @@ class UntisRepository(
     }
 
     suspend fun clearAllData() {
-        untisDao.deleteAllLessons()
-        untisDao.deleteAllHomeworks()
-        untisDao.deleteAllMessages()
-        untisDao.deleteAllMemos()
+        untisDao.clearLessons()
+        untisDao.clearHomeworks()
+        untisDao.clearMessages()
+        untisDao.clearMemos()
     }
     
     fun exportBackup(): String {

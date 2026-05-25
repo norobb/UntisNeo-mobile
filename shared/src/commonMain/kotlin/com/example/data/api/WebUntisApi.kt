@@ -24,6 +24,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -44,6 +45,15 @@ data class SchoolSearchResult(
     val displayName: String,
     val address: String,
     val serverUrl: String
+)
+
+import io.ktor.client.request.header
+
+@Serializable
+data class UntisClass(
+    val id: Int,
+    val name: String,
+    val longName: String
 )
 
 class WebUntisApi {
@@ -72,7 +82,9 @@ class WebUntisApi {
         serverUrl: String, // e.g. "hh5886.webuntis.com"
         school: String, // e.g. "hh5886"
         user: String,
-        pass: String
+        pass: String,
+        customType: Int? = null,
+        customId: Int? = null
     ): List<com.example.data.room.TimetableLesson>? = withContext(Dispatchers.IO) {
         try {
             var cleanServerUrl = serverUrl.trim()
@@ -156,8 +168,8 @@ class WebUntisApi {
                 put("params", buildJsonObject {
                     put("options", buildJsonObject {
                         put("element", buildJsonObject {
-                            put("id", personId)
-                            put("type", personType)
+                            put("id", customId ?: personId)
+                            put("type", customType ?: personType)
                         })
                         put("startDate", startDate)
                         put("endDate", endDate)
@@ -431,6 +443,81 @@ class WebUntisApi {
             list
         } catch (e: Exception) {
             println("WebUntisApi searchSchool error: ${e.message}")
+            emptyList()
+        }
+    }
+
+    suspend fun fetchClasses(
+        serverUrl: String,
+        school: String,
+        user: String,
+        pass: String
+    ): List<UntisClass> = withContext(Dispatchers.IO) {
+        try {
+            var cleanServerUrl = serverUrl.trim()
+            if (cleanServerUrl.startsWith("http://") || cleanServerUrl.startsWith("https://")) {
+                cleanServerUrl = cleanServerUrl.replace("https://", "").replace("http://", "").trimEnd('/')
+                if (cleanServerUrl.contains("/")) {
+                    cleanServerUrl = cleanServerUrl.split("/")[0]
+                }
+            }
+            val schoolEnc = school.encodeURLQueryComponent().replace("+", "%20")
+            val baseUrl = "https://$cleanServerUrl/WebUntis/jsonrpc.do?school=$schoolEnc"
+
+            val authReq = buildJsonObject {
+                put("id", "1")
+                put("method", "authenticate")
+                put("params", buildJsonObject {
+                    put("user", user)
+                    put("password", pass)
+                    put("client", "UntisNeo")
+                })
+                put("jsonrpc", "2.0")
+            }
+
+            val authResponse = client.post(baseUrl) {
+                contentType(ContentType.Application.Json)
+                setBody(authReq.toString())
+            }
+            
+            if (!authResponse.status.isSuccess()) return@withContext emptyList()
+            
+            val authBody = authResponse.bodyAsText()
+            val authJson = Json.parseToJsonElement(authBody).jsonObject
+            val resultObj = authJson["result"]?.jsonObject
+            val sessionId = resultObj?.get("sessionId")?.jsonPrimitive?.content ?: return@withContext emptyList()
+
+            val klassenReq = buildJsonObject {
+                put("id", "2")
+                put("method", "getKlassen")
+                put("params", buildJsonObject {})
+                put("jsonrpc", "2.0")
+            }
+
+            val klassenResponse = client.post(baseUrl) {
+                contentType(ContentType.Application.Json)
+                header("Cookie", "JSESSIONID=$sessionId")
+                setBody(klassenReq.toString())
+            }
+
+            val klassenBody = klassenResponse.bodyAsText()
+            val klassenJson = Json.parseToJsonElement(klassenBody).jsonObject
+            val klassenArray = klassenJson["result"]?.jsonArray ?: return@withContext emptyList()
+
+            val list = mutableListOf<UntisClass>()
+            for (element in klassenArray) {
+                val obj = element.jsonObject
+                list.add(
+                    UntisClass(
+                        id = obj["id"]?.jsonPrimitive?.int ?: 0,
+                        name = obj["name"]?.jsonPrimitive?.content ?: "",
+                        longName = obj["longName"]?.jsonPrimitive?.content ?: ""
+                    )
+                )
+            }
+
+            list
+        } catch (e: Exception) {
             emptyList()
         }
     }

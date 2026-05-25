@@ -3,6 +3,8 @@ package com.example.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -121,7 +123,7 @@ fun LanguageSetupPage() {
                 shape = RoundedCornerShape(12.dp),
                 border = BorderStroke(1.dp, if (isSelected) NothingRed else Color.Transparent),
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-                    .androidx.compose.foundation.clickable {
+                    .clickable {
                         com.example.ui.StringResources.currentLanguage.value = enumVal
                     }
             ) {
