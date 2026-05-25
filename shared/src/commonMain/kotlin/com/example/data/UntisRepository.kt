@@ -4,6 +4,7 @@ import com.example.data.room.*
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.first
 
 class UntisRepository(
     private val settings: Settings,
@@ -405,7 +406,9 @@ class UntisRepository(
             println("UntisRepository: Syncing with WebUntis API at $serverIp for school $schoolId...")
             
             val api = com.example.data.api.WebUntisApi()
-            val lessons = api.fetchTimetable(serverIp, schoolId, username, password)
+            val syncResult = api.fetchTimetableAndHomeworks(serverIp, schoolId, username, password)
+            val lessons = syncResult?.first
+            val homeworks = syncResult?.second
             
             if (lessons != null) {
                 // Apply custom subject colors if configured
@@ -416,6 +419,14 @@ class UntisRepository(
 
                 untisDao.clearLessons()
                 untisDao.insertLessons(coloredLessons)
+                
+                if (homeworks != null) {
+                    val customHomeworks = untisDao.getHomeworksFlow().first().filter { it.isCustom }
+                    untisDao.clearHomeworks()
+                    customHomeworks.forEach { untisDao.insertHomework(it) } // restore custom
+                    homeworks.forEach { untisDao.insertHomework(it) } // insert fetched
+                }
+                
                 println("UntisRepository: Successfully fetched and saved ${coloredLessons.size} lessons.")
                 "SUCCESS"
             } else {
@@ -442,7 +453,7 @@ class UntisRepository(
         if (isDemoMode()) return emptyList()
         return try {
             val api = com.example.data.api.WebUntisApi()
-            val fetched = api.fetchTimetable(getServer(), getSchool(), getUser(), getPass(), customType, customId) ?: emptyList()
+            val fetched = api.fetchTimetableAndHomeworks(getServer(), getSchool(), getUser(), getPass(), customType, customId)?.first ?: emptyList()
             fetched.map { lesson ->
                 val customColor = getSubjectColor(lesson.subjectCode)
                 if (customColor != null) lesson.copy(colorHex = customColor) else lesson

@@ -74,14 +74,14 @@ class WebUntisApi {
         }
     }
 
-    suspend fun fetchTimetable(
+    suspend fun fetchTimetableAndHomeworks(
         serverUrl: String, // e.g. "hh5886.webuntis.com"
         school: String, // e.g. "hh5886"
         user: String,
         pass: String,
         customType: Int? = null,
         customId: Int? = null
-    ): List<com.example.data.room.TimetableLesson>? = withContext(Dispatchers.IO) {
+    ): Pair<List<com.example.data.room.TimetableLesson>, List<com.example.data.room.Homework>>? = withContext(Dispatchers.IO) {
         try {
             var cleanServerUrl = serverUrl.trim()
             if (cleanServerUrl.startsWith("http://") || cleanServerUrl.startsWith("https://")) {
@@ -287,6 +287,69 @@ class WebUntisApi {
                 )
             }
             
+            // FETCH HOMEWORKS
+            val hwReq = buildJsonObject {
+                put("id", "hw")
+                put("method", "getHomeWork2017")
+                put("params", buildJsonObject {
+                    put("id", customId ?: personId)
+                    put("type", "STUDENT") // Usually homework is bound to STUDENT
+                    put("startDate", startDate)
+                    put("endDate", endDate)
+                })
+                put("jsonrpc", "2.0")
+            }
+            
+            val hwResponse = client.post(baseUrl) {
+                contentType(ContentType.Application.Json)
+                setBody(hwReq)
+            }
+            
+            val homeworksList = mutableListOf<com.example.data.room.Homework>()
+            if (hwResponse.status.isSuccess()) {
+                val hwBody = hwResponse.bodyAsText()
+                if (hwBody.isNotEmpty()) {
+                    val hwJson = Json.parseToJsonElement(hwBody).jsonObject
+                    if (!hwJson.containsKey("error")) {
+                        val hwArray = hwJson["result"]?.jsonObject?.get("records")?.jsonArray ?: hwJson["result"]?.jsonArray ?: kotlinx.serialization.json.JsonArray(emptyList())
+                        for (i in 0 until hwArray.size) {
+                            val item = hwArray[i].jsonObject
+                            val hwId = item["id"]?.jsonPrimitive?.int?.toString() ?: kotlin.random.Random.nextLong().toString()
+                            
+                            val dueDateInt = item["dueDate"]?.jsonPrimitive?.int ?: 0
+                            val dYear = dueDateInt / 10000
+                            val dMonth = (dueDateInt / 100) % 100
+                            val dDay = dueDateInt % 100
+                            val dueDateStr = if (dueDateInt > 0) "${dYear}-${dMonth.toString().padStart(2, '0')}-${dDay.toString().padStart(2, '0')}" else ""
+                            
+                            val text = item["text"]?.jsonPrimitive?.content ?: ""
+                            val completed = item["completed"]?.jsonPrimitive?.booleanOrNull ?: false
+                            
+                            var subjectCode = "N/A"
+                            // Sometimes lessonId is provided which maps to a lesson, we can try to find the subject from our lessons
+                            val lessonId = item["lessonId"]?.jsonPrimitive?.int?.toString()
+                            if (lessonId != null) {
+                                val matchedLesson = lessons.find { it.id == lessonId }
+                                if (matchedLesson != null) {
+                                    subjectCode = matchedLesson.subjectCode
+                                }
+                            }
+                            
+                            homeworksList.add(
+                                com.example.data.room.Homework(
+                                    subjectCode = subjectCode,
+                                    description = text,
+                                    dueDate = dueDateStr,
+                                    isCustom = false,
+                                    isDone = completed,
+                                    reminderFrequencyHours = 24
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
             // Logout
             val logoutReq = buildJsonObject {
                 put("id", "logout")
@@ -299,8 +362,8 @@ class WebUntisApi {
                 setBody(logoutReq)
             }
             
-            println("WebUntisApi: Fetched ${lessons.size} lessons.")
-            return@withContext lessons
+            println("WebUntisApi: Fetched ${lessons.size} lessons and ${homeworksList.size} homeworks.")
+            return@withContext Pair(lessons, homeworksList)
 
         } catch (e: Exception) {
             println("WebUntisApi Exception in API: ${e.message}")
