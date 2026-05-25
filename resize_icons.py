@@ -2,7 +2,7 @@ import os
 import json
 from PIL import Image
 
-src_image = r"C:\Users\marya\.gemini\antigravity-cli\brain\e5bafb9d-5d5a-4de2-86ca-691ae8df3617\untisneo_app_icon_1779702876956.png"
+src_image = r"C:\Users\marya\.gemini\antigravity-cli\brain\e5bafb9d-5d5a-4de2-86ca-691ae8df3617\untisneo_logo_1779730745806.png"
 
 android_res = r"androidApp\src\androidMain\res"
 ios_res = r"iosApp\iosApp\Assets.xcassets\AppIcon.appiconset"

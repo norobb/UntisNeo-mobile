@@ -207,6 +207,21 @@ fun HomeScreen(viewModel: UntisViewModel) {
     val homeworks by viewModel.homeworks.collectAsState()
     val memos by viewModel.eventMemos.collectAsState()
 
+    var showFeatureNotReadyDialog by remember { mutableStateOf(false) }
+
+    if (showFeatureNotReadyDialog) {
+        AlertDialog(
+            onDismissRequest = { showFeatureNotReadyDialog = false },
+            title = { Text("Bald verfügbar", fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, color = NothingWhite) },
+            text = { Text("Dieses Feature wird in einem zukünftigen Update freigeschaltet!", color = NothingMutedGray) },
+            confirmButton = {
+                TextButton(onClick = { showFeatureNotReadyDialog = false }) { Text("OK", color = NothingWhite) }
+            },
+            containerColor = NothingCardGray,
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
+
     // Current Date Formatter (KMP-compatible)
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     val curDateStr = "${now.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }}, ${now.dayOfMonth.toString().padStart(2, '0')}. ${now.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${now.year}"
@@ -430,7 +445,7 @@ fun HomeScreen(viewModel: UntisViewModel) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { /* Sprechstunden */ }
+                            .clickable { showFeatureNotReadyDialog = true }
                             .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween

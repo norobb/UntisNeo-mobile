@@ -1,17 +1,22 @@
 package com.example.utils
 
-// KMP Stub - actual notification logic is platform-specific
-// On Android, notifications are handled natively via androidMain
+expect class NotificationPlatformHelper() {
+    fun initChannels()
+    fun showNotification(title: String, content: String)
+}
+
 object NotificationHelper {
+    private val platformHelper = NotificationPlatformHelper()
+
     fun initChannels() {
-        // no-op on non-Android platforms
+        platformHelper.initChannels()
     }
 
     fun showHomeworkNotification(title: String, content: String) {
-        println("[NOTIFICATION] $title: $content")
+        platformHelper.showNotification(title, content)
     }
 
     fun showTimetableChangeNotification(title: String, content: String) {
-        println("[NOTIFICATION] $title: $content")
+        platformHelper.showNotification(title, content)
     }
 }
