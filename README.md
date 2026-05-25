@@ -1,8 +1,8 @@
 # 🎓 UntisNeo
 
-> **Der modernste, plattformübergreifende Stundenplan-Client. Powered by Kotlin Multiplatform.**
+> **Der modernste, native Android Stundenplan-Client mit "Liquid Glass" Design.**
 
-UntisNeo ist eine revolutionäre Open-Source-Alternative zur klassischen Stundenplan-App. Sie verbindet ein atemberaubendes "Liquid Glass" Design mit künstlicher Intelligenz (Google Gemini) und dezentralen P2P-Funktionen (Meshtastic) – **gleichzeitig für Android und iOS!**
+UntisNeo ist eine revolutionäre Open-Source-Alternative zur klassischen Stundenplan-App. Sie verbindet ein atemberaubendes, transluzentes "Liquid Glass" Design mit künstlicher Intelligenz (Google Gemini) und echtem WebUntis-Hausaufgaben-Sync – exklusiv für Android!
 
 <br>
 
@@ -17,43 +17,34 @@ UntisNeo ist eine revolutionäre Open-Source-Alternative zur klassischen Stunden
 
 ## ✨ Features
 
-- 📱 **Cross-Platform**: Eine einzige, moderne Code-Basis (KMP & Compose Multiplatform) liefert native Apps für Android, iOS und Desktop.
-- 🎨 **UntisPlus "Liquid Glass" Design**: Wunderschöne, transluzente Unterrichtskarten mit weichen Unschärfe-Effekten, die sich dynamisch anpassen.
+- 📱 **Nativ & Performant**: Entwickelt in Jetpack Compose für ein extrem flüssiges und stabiles Android-Erlebnis.
+- 🎨 **UntisPlus "Liquid Glass" Design**: Wunderschöne, transluzente Unterrichtskarten mit echten nativen Unschärfe-Effekten (`Modifier.blur`), die sich dynamisch anpassen.
+- 📚 **Echter Hausaufgaben-Sync**: Zieht (im Gegensatz zu anderen Third-Party-Clients) echte Hausaufgaben direkt über die JSON-RPC API aus WebUntis, inklusive Dringlichkeits-Badges und Icons.
 - 🤖 **Neo Smart-Assistant (Gemini)**: Integrierter KI-Chatbot, der deinen Stundenplan versteht. Frage nach Hausaufgaben, Vertretungen oder lade Fotos deiner Aufgabenblätter hoch!
 - 🔄 **Smart Background Sync**: Überprüft den Stundenplan automatisch im Hintergrund. Du erhältst nur dann eine Push-Benachrichtigung, wenn wirklich etwas ausfällt oder verschoben wird.
 - 📡 **Meshtastic / P2P**: Teile Hausaufgaben offline per Bluetooth oder LoRa-Mesh-Netzwerk direkt mit deinen Klassenkameraden.
 
 ## 🚀 Installation
 
-Dank GitHub Actions wird bei jedem neuen Release vollautomatisch eine `UntisNeo.apk` (Android) und eine `UntisNeo.ipa` (iOS) kompiliert. 
+Dank GitHub Actions wird bei jedem neuen Release vollautomatisch eine `UntisNeo.apk` kompiliert. 
 
-### Für Android
 1. Gehe auf die [Releases-Seite](https://github.com/norobb/UntisNeo-mobile/releases).
 2. Lade die neueste `UntisNeo.apk` herunter.
 3. Öffne die Datei auf deinem Smartphone und installiere sie (ggf. "Installation aus unbekannten Quellen" zulassen).
-4. **Auto-Updates:** Die App prüft beim Start automatisch auf neue Versionen und lädt diese direkt herunter!
+4. **Auto-Updates:** Die App prüft beim Start automatisch auf neue Versionen und öffnet direkt den Download, falls verfügbar!
 
-### Für iOS (Sideloading)
-1. Gehe auf die [Releases-Seite](https://github.com/norobb/UntisNeo-mobile/releases).
-2. Lade die neueste `UntisNeo.ipa` herunter.
-3. Installiere die App über **AltStore**, **Sideloadly** oder **TrollStore** auf deinem iPhone oder iPad.
-*(Hinweis: Da iOS-Sideloading keine In-App-Updates erlaubt, müssen neue IPA-Versionen manuell über den AltStore installiert werden).*
+*(Suchst du nach der iOS-Version? Der veraltete KMP-Code für iOS befindet sich im Branch `ios-support`)*
 
 ## 🛠️ Für Entwickler
 
-Das Projekt nutzt **Kotlin Multiplatform (KMP)**.
+Das Projekt nutzt **Jetpack Compose**.
 - `shared/`: Die gesamte UI (Compose), Datenbank (Room/SQLite), API (Ktor) und Logik.
-- `androidApp/`: Der Android-spezifische Einstiegspunkt.
-- `iosApp/`: Der iOS-spezifische Einstiegspunkt (SwiftUI Wrapper).
-- `desktopApp/`: Der Desktop-Einstiegspunkt.
+- `androidApp/`: Der Android-spezifische App-Wrapper.
 
 ### Lokales Kompilieren
 ```bash
-# Android Debug APK
+# Android Debug APK bauen
 ./gradlew assembleDebug
-
-# iOS Framework (wird für Xcode benötigt)
-./gradlew :shared:linkReleaseFrameworkIosArm64
 ```
 
 ---
