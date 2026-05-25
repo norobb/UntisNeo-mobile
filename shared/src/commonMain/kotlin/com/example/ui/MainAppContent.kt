@@ -51,7 +51,7 @@ fun MainAppContent(viewModel: UntisViewModel) {
             },
             confirmButton = {
                 Button(onClick = {
-                    com.example.utils.AutoUpdater.downloadAndInstall(updateInfo!!.downloadUrl)
+                    com.example.utils.SystemIntents.downloadAndInstallApk(updateInfo!!.downloadUrl)
                     viewModel.dismissUpdate()
                 }) {
                     Text("Update")
@@ -131,6 +131,8 @@ fun MainAppContent(viewModel: UntisViewModel) {
                 "MESSAGES" -> MessagesScreen(viewModel)
                 "CHATBOT" -> ChatbotScreen(viewModel)
                 "SETTINGS" -> SettingsScreen(viewModel)
+                "SETTINGS_SUBJECTS" -> SettingsSubjectsScreen(viewModel)
+                "HELP" -> HelpScreen(viewModel)
                 "ARCADE" -> ArcadeScreen(viewModel)
                 else -> HomeScreen(viewModel)
             }

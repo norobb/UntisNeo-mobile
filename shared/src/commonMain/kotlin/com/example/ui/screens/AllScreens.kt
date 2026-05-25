@@ -550,6 +550,8 @@ fun TimetableScreen(viewModel: UntisViewModel) {
         lessons.map { lesson -> getMonday(lesson.dateStr) }.distinct().sorted()
     }
     
+    var showClassSelectionDialog by remember { mutableStateOf(false) }
+
     val pagerState = androidx.compose.foundation.pager.rememberPagerState(
         initialPage = 0,
         pageCount = { weeks.size.coerceAtLeast(1) }
@@ -579,8 +581,21 @@ fun TimetableScreen(viewModel: UntisViewModel) {
         ) {
             @OptIn(ExperimentalMaterial3Api::class)
             TopAppBar(
-                title = { Text("Stundenplan", fontWeight = FontWeight.Bold, fontFamily = FontFamily.SansSerif) },
+                title = { 
+                    Column {
+                        Text("Stundenplan", fontWeight = FontWeight.Bold, fontFamily = FontFamily.SansSerif)
+                        if (viewModel.viewingClassName != null) {
+                            Text(viewModel.viewingClassName!!, fontSize = 12.sp, color = NothingMutedGray)
+                        }
+                    }
+                },
                 actions = {
+                    IconButton(onClick = { 
+                        viewModel.loadClasses()
+                        showClassSelectionDialog = true
+                    }) {
+                        Icon(Icons.Default.PersonSearch, contentDescription = "Klasse wählen")
+                    }
                     IconButton(onClick = { viewModel.isWeekView = !viewModel.isWeekView }) {
                         Icon(if (viewModel.isWeekView) Icons.Default.DateRange else Icons.Outlined.DateRange, contentDescription = "Ansicht wechseln")
                     }
@@ -668,6 +683,49 @@ fun TimetableScreen(viewModel: UntisViewModel) {
                         }
                     }
                 }
+            }
+
+            if (showClassSelectionDialog) {
+                AlertDialog(
+                    onDismissRequest = { showClassSelectionDialog = false },
+                    title = { Text("Stundenplan auswählen", fontWeight = FontWeight.Bold, color = NothingWhite) },
+                    text = {
+                        Column {
+                            if (viewModel.availableClasses.isEmpty()) {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally), color = NothingWhite)
+                            } else {
+                                LazyColumn(modifier = Modifier.fillMaxHeight(0.6f)) {
+                                    item {
+                                        ListTile(
+                                            title = "Mein Stundenplan",
+                                            icon = Icons.Default.Person,
+                                            onClick = {
+                                                viewModel.resetToMyTimetable()
+                                                showClassSelectionDialog = false
+                                            }
+                                        )
+                                        Divider(color = Color(0xFF333333))
+                                    }
+                                    items(viewModel.availableClasses) { untisClass ->
+                                        ListTile(
+                                            title = untisClass.name,
+                                            subtitle = untisClass.longName,
+                                            icon = Icons.Outlined.Person,
+                                            onClick = {
+                                                viewModel.selectClass(untisClass.id, untisClass.name)
+                                                showClassSelectionDialog = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showClassSelectionDialog = false }) { Text("Schließen", color = NothingWhite) }
+                    },
+                    containerColor = NothingCardGray
+                )
             }
         } // Header End
 
@@ -1883,8 +1941,17 @@ fun ChatbotScreen(viewModel: UntisViewModel) {
     val borderColor = if (isDark) Color(0xFF222222) else Color(0xFFE2E8F0)
     val uriHandler = LocalUriHandler.current
 
-    // Camera/gallery not available in KMP commonMain - placeholder only
-
+    // Image picker logic
+    val imagePicker = com.example.utils.rememberImagePicker { byteArray ->
+        if (byteArray != null) {
+            selectedImageState = byteArray
+            // Auto-send image with current text or empty text
+            val textToSend = viewModel.activeChatInput
+            viewModel.sendChatPrompt(textToSend, byteArray)
+            selectedImageState = null
+            viewModel.activeChatInput = ""
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -2174,7 +2241,7 @@ fun ChatbotScreen(viewModel: UntisViewModel) {
 
                     // Custom style button to choose from gallery
                     Button(
-                        onClick = { println("Galerie nicht verfügbar") },
+                        onClick = { imagePicker() },
                         colors = ButtonDefaults.buttonColors(containerColor = if (isDark) Color(0xFF1E1E1E) else Color(0xFFE2E8F0)),
                         shape = RoundedCornerShape(20.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
@@ -2259,6 +2326,53 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         checked = viewModel.useStockThemePref,
                         onCheckedChange = { 
                             viewModel.useStockThemePref = it
+                            viewModel.saveAppSettings()
+                        }
+                    )
+                }
+            }
+        }
+
+        // Appearance Section
+        item {
+            Surface(
+                color = NothingCardGray,
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, borderColor),
+                modifier = Modifier.fillMaxWidth().clickable {
+                    viewModel.currentScreen = "SETTINGS_SUBJECTS"
+                }
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text("Fächer & Farben", fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, color = NothingWhite, fontSize = 16.sp)
+                        Text("Farben für Schulfächer anpassen", fontFamily = FontFamily.SansSerif, color = NothingMutedGray, fontSize = 12.sp)
+                    }
+                    Icon(Icons.Default.ArrowForward, contentDescription = "Öffnen", tint = NothingMutedGray)
+                }
+            }
+        }
+
+        item {
+            Surface(
+                color = NothingCardGray,
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, borderColor),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("LIQUID GLASS (iOS STYLE)", fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, color = NothingMutedGray, fontSize = 11.sp, letterSpacing = 1.sp)
+                    
+                    SettingsToggleRow(
+                        title = "Blur Effekte aktivieren",
+                        desc = "Nutzt rechenintensive Weichzeichner im KMP-UI",
+                        checked = viewModel.useLiquidGlassPref,
+                        onCheckedChange = { 
+                            viewModel.useLiquidGlassPref = it
                             viewModel.saveAppSettings()
                         }
                     )
@@ -2385,6 +2499,59 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
+
+                    NothingButton(
+                        text = "Hilfe & Tutorials (Setup)",
+                        onClick = {
+                            viewModel.currentScreen = "HELP"
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        isPrimary = false
+                    )
+                }
+            }
+        }
+
+        // Backup Section
+        item {
+            Surface(
+                color = NothingCardGray,
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, borderColor),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("BACKUP & WIEDERHERSTELLUNG", fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, color = NothingMutedGray, fontSize = 11.sp, letterSpacing = 1.sp)
+
+                    var backupString by remember { mutableStateOf("") }
+                    
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        NothingButton(
+                            text = "Backup Exportieren",
+                            onClick = {
+                                backupString = viewModel.repository.exportBackup()
+                                clipboard.setText(androidx.compose.ui.text.AnnotatedString(backupString))
+                            },
+                            modifier = Modifier.weight(1f),
+                            isPrimary = false
+                        )
+                        NothingButton(
+                            text = "Wiederherstellen",
+                            onClick = {
+                                clipboard.getText()?.text?.let { text ->
+                                    if(text.contains(";")) {
+                                        viewModel.repository.importBackup(text)
+                                        viewModel.refreshData()
+                                    }
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            isPrimary = false
+                        )
+                    }
+                    if (backupString.isNotEmpty()) {
+                        Text("Backup wurde in die Zwischenablage kopiert!", color = NothingRed, fontSize = 12.sp)
+                    }
                 }
             }
         }
@@ -2696,6 +2863,96 @@ fun InfoScreen(viewModel: UntisViewModel) {
                         color = NothingWhite,
                         fontSize = 14.sp
                     )
+                }
+            }
+        }
+    }
+}
+
+// --- SETTINGS SUBJECTS SCREEN ---
+@Composable
+fun SettingsSubjectsScreen(viewModel: UntisViewModel) {
+    val isDark = androidx.compose.foundation.isSystemInDarkTheme()
+    val borderColor = if (isDark) Color(0xFF222222) else Color(0xFFE2E8F0)
+    
+    // We need a list of standard subjects and their default colors
+    val subjects = listOf(
+        "Ma" to "D56BFF", "D" to "EF4444", "E" to "4A9DFF", "F" to "36A2EB",
+        "L" to "14B8A6", "Spa" to "EAB308", "Bio" to "22C55E", "Ch" to "4BC0C0",
+        "Phy" to "36A2EB", "Inf" to "6366F1", "Ge" to "EAB308", "PGW" to "F59E0B",
+        "Geo" to "CAD982", "Rel" to "A855F7", "Phi" to "8B5CF6", "Mu" to "FF6384",
+        "Ku" to "EC4899", "Sp" to "9966FF"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(NothingBlack)
+            .padding(16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 16.dp)) {
+            IconButton(onClick = { viewModel.currentScreen = "SETTINGS" }) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Zurück", tint = NothingWhite)
+            }
+            NothingHeader(text = "Fächer & Farben", fontSize = 24.sp)
+        }
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(subjects.size) { index ->
+                val (code, defaultHex) = subjects[index]
+                var currentHex by remember { 
+                    mutableStateOf(viewModel.repository.getSubjectColor(code) ?: defaultHex) 
+                }
+                var showColorPicker by remember { mutableStateOf(false) }
+
+                Surface(
+                    color = NothingCardGray,
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, borderColor),
+                    modifier = Modifier.fillMaxWidth().clickable { showColorPicker = !showColorPicker }
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(code, fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, color = NothingWhite, fontSize = 18.sp)
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .background(Color(currentHex.toLong(16) or 0xFF000000), CircleShape)
+                            )
+                        }
+
+                        if (showColorPicker) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            // Simple palette selection
+                            val palette = listOf("EF4444", "F97316", "EAB308", "22C55E", "14B8A6", "06B6D4", "3B82F6", "6366F1", "8B5CF6", "D946EF", "F43F5E", "94A3B8")
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                items(palette.size) { pIndex ->
+                                    val hex = palette[pIndex]
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .background(Color(hex.toLong(16) or 0xFF000000), CircleShape)
+                                            .clickable {
+                                                currentHex = hex
+                                                viewModel.repository.saveSubjectColor(code, hex)
+                                                // Trigger a refresh of the timetable cache
+                                                viewModel.coroutineScope.launch {
+                                                    viewModel.repository.performSync()
+                                                    viewModel.refreshData()
+                                                }
+                                                showColorPicker = false
+                                            }
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

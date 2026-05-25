@@ -32,6 +32,7 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
     var passwordInput by mutableStateOf(repository.getPass().ifEmpty { "" })
     var useDemoModePref by mutableStateOf(repository.isDemoMode())
     var useStockThemePref by mutableStateOf(repository.getUseStockTheme())
+    var useLiquidGlassPref by mutableStateOf(repository.getUseLiquidGlass())
     var geminiApiKeyInput by mutableStateOf(repository.getGeminiApiKey())
     var reminderMinutesInput by mutableStateOf(repository.getReminderMinutes())
     var homeworkNotificationsEnabled by mutableStateOf(repository.getHomeworkNotificationsEnabled())
@@ -56,6 +57,13 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
     var schoolSearchResults by mutableStateOf<List<com.example.data.api.SchoolSearchResult>>(emptyList())
     var isSearchingSchool by mutableStateOf(false)
 
+    // --- Timetable Selection ---
+    var availableClasses by mutableStateOf<List<com.example.data.api.UntisClass>>(emptyList())
+    var viewingClassId by mutableStateOf<Int?>(null)
+    var viewingClassName by mutableStateOf<String?>(null)
+    var isLoadingCustomTimetable by mutableStateOf(false)
+    val customLessons = MutableStateFlow<List<TimetableLesson>?>(null)
+
     // --- Loading & Sync Status ---
     var isSyncing by mutableStateOf(false)
     var syncMessage by mutableStateOf("Synchronisiert...")
@@ -73,8 +81,12 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
     var isChatAnalyzing by mutableStateOf(false)
 
     // --- Subscriptions (Flow to State) ---
-    val lessons: StateFlow<List<TimetableLesson>> = repository.allLessons
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val lessons: StateFlow<List<TimetableLesson>> = kotlinx.coroutines.flow.combine(
+        repository.allLessons,
+        customLessons
+    ) { all, custom ->
+        custom ?: all
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val homeworks: StateFlow<List<Homework>> = repository.allHomeworks
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -231,11 +243,37 @@ class UntisViewModel(private val repository: UntisRepository) : ViewModel() {
         }
     }
 
+    fun loadClasses() {
+        if (availableClasses.isNotEmpty()) return
+        viewModelScope.launch {
+            availableClasses = repository.getClasses()
+        }
+    }
+
+    fun selectClass(id: Int, name: String) {
+        viewingClassId = id
+        viewingClassName = name
+        viewModelScope.launch {
+            isLoadingCustomTimetable = true
+            customLessons.value = emptyList() // Clear temporarily
+            val fetched = repository.fetchCustomTimetable(1, id) // 1 = Class
+            customLessons.value = fetched
+            isLoadingCustomTimetable = false
+        }
+    }
+
+    fun resetToMyTimetable() {
+        viewingClassId = null
+        viewingClassName = null
+        customLessons.value = null
+    }
+
     fun saveAppSettings() {
         repository.saveCredentials(serverInput, schoolInput, userInput, passwordInput, useDemoModePref)
         repository.saveGeminiApiKey(geminiApiKeyInput)
         repository.saveReminderMinutes(reminderMinutesInput)
         repository.saveUseStockTheme(useStockThemePref)
+        repository.saveUseLiquidGlass(useLiquidGlassPref)
         repository.saveHomeworkNotificationsEnabled(homeworkNotificationsEnabled)
         repository.saveTimetableNotificationsEnabled(timetableNotificationsEnabled)
         repository.saveHasCompletedOnboarding(hasCompletedOnboarding)

@@ -434,5 +434,40 @@ class WebUntisApi {
             emptyList()
         }
     }
+
+    // --- Phase 4: Extended APIs (Mocked/Prep for REST /v2/ usage) ---
+    
+    suspend fun fetchAnnouncements(serverUrl: String, tenant: String, jwtToken: String): String = withContext(Dispatchers.IO) {
+        // This would call https://{serverUrl}/WebUntis/api/rest/view/v1/dashboard/cards/status
+        // using the Bearer JWT token from the new authentication flow.
+        println("WebUntisApi: fetchAnnouncements called for tenant $tenant")
+        return@withContext "Keine neuen Ankündigungen."
+    }
+
+    suspend fun fetchHomeworkDetails(
+        serverUrl: String,
+        elementId: String,
+        start: String,
+        end: String,
+        jwtToken: String,
+        jsessionId: String
+    ): String = withContext(Dispatchers.IO) {
+        try {
+            val url = "https://$serverUrl/WebUntis/api/rest/view/v2/calendar-entry/detail?elementId=$elementId&elementType=5&endDateTime=${end.encodeURLQueryComponent()}&homeworkOption=DUE&startDateTime=${start.encodeURLQueryComponent()}"
+            val response = client.get(url) {
+                header("authorization", "Bearer $jwtToken")
+                header("cookie", "JSESSIONID=$jsessionId")
+                header("accept", "application/json, text/plain, */*")
+                header("priority", "u=1, i")
+            }
+            if (response.status.isSuccess()) {
+                response.bodyAsText()
+            } else {
+                "Fehler beim Laden der Hausaufgaben: HTTP ${response.status.value}"
+            }
+        } catch (e: Exception) {
+            "Ausnahme beim Laden der Hausaufgaben: ${e.message}"
+        }
+    }
 }
 

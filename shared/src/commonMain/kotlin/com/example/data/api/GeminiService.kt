@@ -1,4 +1,4 @@
-﻿package com.example.data.api
+package com.example.data.api
 
 import com.example.data.room.Homework
 import io.ktor.client.HttpClient

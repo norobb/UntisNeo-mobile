@@ -51,6 +51,19 @@ class UntisRepository(
         settings.putBoolean("use_stock_theme", use)
     }
 
+    fun getUseLiquidGlass(): Boolean = settings.getBoolean("use_liquid_glass", false)
+    fun saveUseLiquidGlass(use: Boolean) {
+        settings.putBoolean("use_liquid_glass", use)
+    }
+
+    fun getSubjectColor(subjectCode: String): String? {
+        val color = settings.getString("color_$subjectCode", "")
+        return if (color.isNotEmpty()) color else null
+    }
+    fun saveSubjectColor(subjectCode: String, hexColor: String) {
+        settings.putString("color_$subjectCode", hexColor)
+    }
+
     fun getHasCompletedOnboarding(): Boolean = settings.getBoolean("has_completed_onboarding", false)
     fun saveHasCompletedOnboarding(completed: Boolean) {
         settings.putBoolean("has_completed_onboarding", completed)
@@ -192,6 +205,48 @@ class UntisRepository(
                 folder = "INBOX"
             )
         )
+    }
+
+    suspend fun clearAllData() {
+        untisDao.deleteAllLessons()
+        untisDao.deleteAllHomeworks()
+        untisDao.deleteAllMessages()
+        untisDao.deleteAllMemos()
+    }
+    
+    fun exportBackup(): String {
+        val backupMap = mutableMapOf<String, String>()
+        backupMap["server"] = settings.getString("server", "")
+        backupMap["school"] = settings.getString("school", "")
+        backupMap["user"] = settings.getString("user", "")
+        backupMap["pass"] = settings.getString("pass", "")
+        backupMap["gemini_api_key"] = settings.getString("gemini_api_key", "")
+        backupMap["reminder_minutes"] = settings.getInt("reminder_minutes", 15).toString()
+        backupMap["use_stock_theme"] = settings.getBoolean("use_stock_theme", false).toString()
+        backupMap["use_liquid_glass"] = settings.getBoolean("use_liquid_glass", false).toString()
+        
+        return backupMap.entries.joinToString(separator = ";") { "${it.key}=${it.value}" }
+    }
+    
+    fun importBackup(backupString: String) {
+        val pairs = backupString.split(";")
+        pairs.forEach { pair ->
+            val parts = pair.split("=")
+            if (parts.size == 2) {
+                val key = parts[0]
+                val value = parts[1]
+                when(key) {
+                    "server" -> settings.putString(key, value)
+                    "school" -> settings.putString(key, value)
+                    "user" -> settings.putString(key, value)
+                    "pass" -> settings.putString(key, value)
+                    "gemini_api_key" -> settings.putString(key, value)
+                    "reminder_minutes" -> settings.putInt(key, value.toIntOrNull() ?: 15)
+                    "use_stock_theme" -> settings.putBoolean(key, value.toBooleanStrictOrNull() ?: false)
+                    "use_liquid_glass" -> settings.putBoolean(key, value.toBooleanStrictOrNull() ?: false)
+                }
+            }
+        }
     }
 
     suspend fun forceResetAndSeedDemoData() {
@@ -353,9 +408,15 @@ class UntisRepository(
             val lessons = api.fetchTimetable(serverIp, schoolId, username, password)
             
             if (lessons != null) {
+                // Apply custom subject colors if configured
+                val coloredLessons = lessons.map { lesson ->
+                    val customColor = getSubjectColor(lesson.subjectCode)
+                    if (customColor != null) lesson.copy(colorHex = customColor) else lesson
+                }
+
                 untisDao.clearLessons()
-                untisDao.insertLessons(lessons)
-                println("UntisRepository: Successfully fetched and saved ${lessons.size} lessons.")
+                untisDao.insertLessons(coloredLessons)
+                println("UntisRepository: Successfully fetched and saved ${coloredLessons.size} lessons.")
                 "SUCCESS"
             } else {
                 "Leere Stundenplandaten erhalten"
@@ -364,6 +425,30 @@ class UntisRepository(
             val errMsg = e.message ?: "Unbekannter Fehler bei der Synchronisation"
             println("UntisRepository: API sync failed: $errMsg. Exception: $e")
             errMsg
+        }
+    }
+
+    suspend fun getClasses(): List<com.example.data.api.UntisClass> {
+        if (isDemoMode()) return emptyList()
+        return try {
+            val api = com.example.data.api.WebUntisApi()
+            api.fetchClasses(getServer(), getSchool(), getUser(), getPass())
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun fetchCustomTimetable(customType: Int, customId: Int): List<TimetableLesson> {
+        if (isDemoMode()) return emptyList()
+        return try {
+            val api = com.example.data.api.WebUntisApi()
+            val fetched = api.fetchTimetable(getServer(), getSchool(), getUser(), getPass(), customType, customId) ?: emptyList()
+            fetched.map { lesson ->
+                val customColor = getSubjectColor(lesson.subjectCode)
+                if (customColor != null) lesson.copy(colorHex = customColor) else lesson
+            }
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 }
