@@ -1,3 +1,4 @@
+import androidx.compose.ui.window.ComposeUIViewController
 import com.example.data.UntisRepository
 import com.example.data.room.InMemoryUntisDao
 import com.russhwolf.settings.NSUserDefaultsSettings
@@ -10,3 +11,5 @@ actual fun createRepository(): UntisRepository {
     val dao = InMemoryUntisDao()
     return UntisRepository(settings, dao)
 }
+
+fun MainViewController() = ComposeUIViewController { App() }
