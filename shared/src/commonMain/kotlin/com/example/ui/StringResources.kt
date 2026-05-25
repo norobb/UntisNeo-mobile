@@ -2,7 +2,7 @@ package com.example.ui
 
 import androidx.compose.runtime.mutableStateOf
 
-enum class AppLanguage { DE, EN }
+enum class AppLanguage { DE }
 
 object StringResources {
     var currentLanguage = mutableStateOf(AppLanguage.DE)
@@ -74,73 +74,6 @@ object StringResources {
             "Zwangssync" to "Sync",
             "Sprache / Language" to "Sprache",
             "Wähle die App-Sprache aus" to "Wähle die App-Sprache aus"
-        ),
-        AppLanguage.EN to mapOf(
-            "Untis Neo" to "Untis Neo",
-            "Die schönere Oberfläche für deinen Schulalltag." to "The more beautiful interface for your school day.",
-            "ANMELDUNG" to "LOGIN",
-            "Demo-Modus aktivieren" to "Enable Demo Mode",
-            "Lädt die echten Screenshots-Daten zur Vorschau!" to "Loads real mock data for preview!",
-            "Bitte gib einen Benutzernamen ein oder starte den Demo-Modus!" to "Please enter a username or start Demo Mode!",
-            "LERNPLATZ" to "DASHBOARD",
-            "HOMEWORK" to "HOMEWORK",
-            "Aufgaben offen" to "Tasks pending",
-            "Fehlstunden (0 krank)" to "Absences (0 sick)",
-            "Sprechstunden geladen." to "Office hours loaded.",
-            "Lehrer Sprechstunden" to "Teacher Office Hours",
-            "Schulferien anzeigen..." to "Show school holidays...",
-            "Ferien & Feiertage" to "Holidays & Vacations",
-            "AI HAUSAUFGABEN HELFER" to "AI HOMEWORK HELPER",
-            "Fotografiere dein Buch oder Arbeitsblatt, um Hausaufgaben direkt einzutragen!" to "Take a picture of your book to enter homework!",
-            "Gelehrtenschule" to "High School",
-            "Keine Stunden für diesen Tag." to "No lessons for this day.",
-            "NORMAL" to "REGULAR",
-            "ENTFÄLLT" to "CANCELLED",
-            "Raumänderung" to "Room change",
-            "ICS KALENDERABONNEMENT" to "ICS CALENDAR SYNC",
-            "Stundenplan lokal als ICS exportiert (Cache)!" to "Timetable exported as ICS!",
-            "ICS DATEI EXPORT" to "EXPORT ICS FILE",
-            "ICS Link in die Zwischenablage kopiert! Trage diesen im Google Kalender ein." to "ICS link copied! Add it to Google Calendar.",
-            "ICS LINK KOPIEREN" to "COPY ICS LINK",
-            "Mitteilungen" to "Messages",
-            "Inhalt oder Person suchen" to "Search content or person",
-            "Keine Nachrichten vorhanden." to "No messages available.",
-            "Nachricht schreiben" to "Write message",
-            "NEUE NACHRICHT" to "NEW MESSAGE",
-            "Bestätigen" to "Confirm",
-            "Senden" to "Send",
-            "Hausaufgaben" to "Homework",
-            "Nur ungelöste Aufgaben" to "Unsolved only",
-            "Sehr schön, keine Hausaufgaben ausstehend!" to "Great, no pending homework!",
-            "PRIVAT" to "PRIVATE",
-            "EIGENE HAUSAUFGABE" to "OWN HOMEWORK",
-            "Abbrechen" to "Cancel",
-            "Hinzufügen" to "Add",
-            "Notenspiegel" to "Grades",
-            "NOTENSCHNITT" to "GPA AVG",
-            "Unter Berücksichtigung aller Gewichtungen" to "Considering all weights",
-            "0-15 PUNKTE" to "0-15 POINTS",
-            "1-6 SCHULNOTEN" to "1-6 GRADES",
-            "Noch keine Noten eingetragen." to "No grades yet.",
-            "Löschen" to "Delete",
-            "NEUE NOTE EINTRAGEN" to "ENTER NEW GRADE",
-            "Eintragen" to "Save",
-            "KI-Hausaufgaben" to "AI Homework",
-            "Lade Hausaufgabenscreenshots hoch & die KI trägt sie strukturiert ein!" to "Upload images and AI will parse them!",
-            "Analysiere Hausaufgaben mit Gemini..." to "Analyzing homework...",
-            "Screenshot aus Galerie ausgewählt!" to "Image selected!",
-            "MOCK SCREENSHOT HOCHLADEN" to "UPLOAD MOCK IMAGE",
-            "Einstellungen" to "Settings",
-            "API & VERBINDUNG" to "API & CONNECTION",
-            "Einstellungen gespeichert!" to "Settings saved!",
-            "STUNDENPLAN ANSICHT" to "TIMETABLE VIEW",
-            "Home" to "Home",
-            "Timetable" to "Timetable",
-            "Messages" to "Messages",
-            "Profile" to "Profile",
-            "Zwangssync" to "Sync",
-            "Sprache / Language" to "Language",
-            "Wähle die App-Sprache aus" to "Select App Language"
         )
     )
 

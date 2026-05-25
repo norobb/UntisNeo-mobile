@@ -162,17 +162,10 @@ class WebUntisApi {
                 put("id", "tt")
                 put("method", "getTimetable")
                 put("params", buildJsonObject {
-                    put("options", buildJsonObject {
-                        put("element", buildJsonObject {
-                            put("id", customId ?: personId)
-                            put("type", customType ?: personType)
-                        })
-                        put("startDate", startDate)
-                        put("endDate", endDate)
-                        put("showLstext", true)
-                        put("showInfo", true)
-                        put("showSubstText", true)
-                    })
+                    put("id", customId ?: personId)
+                    put("type", customType ?: personType)
+                    put("startDate", startDate)
+                    put("endDate", endDate)
                 })
                 put("jsonrpc", "2.0")
             }

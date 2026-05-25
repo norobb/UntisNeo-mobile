@@ -44,7 +44,7 @@ fun OnboardingScreen(viewModel: UntisViewModel) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            for (i in 0..3) {
+            for (i in 0..2) {
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
@@ -60,10 +60,9 @@ fun OnboardingScreen(viewModel: UntisViewModel) {
         Spacer(modifier = Modifier.weight(1f))
 
         when (currentPage) {
-            0 -> LanguageSetupPage()
-            1 -> WelcomePage()
-            2 -> GeminiSetupPage(viewModel)
-            3 -> FinishPage()
+            0 -> WelcomePage()
+            1 -> GeminiSetupPage(viewModel)
+            2 -> FinishPage()
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -81,15 +80,15 @@ fun OnboardingScreen(viewModel: UntisViewModel) {
                 Spacer(modifier = Modifier.width(80.dp))
             }
 
-            if (currentPage < 3) {
+            if (currentPage < 2) {
                 NothingButton(
                     text = "Weiter",
                     onClick = { currentPage++ },
-                    modifier = Modifier.width(120.dp)
+                    modifier = Modifier.width(140.dp)
                 )
             } else {
                 NothingButton(
-                    text = "Los geht's!",
+                    text = "Loslegen",
                     onClick = {
                         viewModel.hasCompletedOnboarding = true
                         viewModel.saveAppSettings()
@@ -101,43 +100,6 @@ fun OnboardingScreen(viewModel: UntisViewModel) {
     }
 }
 
-@Composable
-fun LanguageSetupPage() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Sprache / Language",
-            fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.Black,
-            fontSize = 28.sp,
-            color = NothingWhite,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        val languages = listOf("Deutsch (DE)" to com.example.ui.AppLanguage.DE, "English (EN)" to com.example.ui.AppLanguage.EN)
-        
-        languages.forEach { (name, enumVal) ->
-            val isSelected = com.example.ui.StringResources.currentLanguage.value == enumVal
-            Surface(
-                color = if (isSelected) NothingRed.copy(alpha = 0.2f) else NothingCardGray,
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, if (isSelected) NothingRed else Color.Transparent),
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-                    .clickable {
-                        com.example.ui.StringResources.currentLanguage.value = enumVal
-                    }
-            ) {
-                Text(
-                    text = name,
-                    color = NothingWhite,
-                    modifier = Modifier.padding(16.dp),
-                    textAlign = TextAlign.Center,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun WelcomePage() {

@@ -22,7 +22,7 @@ data class UpdateInfo(
 
 object AutoUpdater {
     private const val REPO_URL = "https://api.github.com/repos/norobb/UntisNeo-mobile/releases/latest"
-    private const val CURRENT_VERSION = "1.0.0" // Will be replaced per platform
+    private const val CURRENT_VERSION = "2.0.0"
 
     private val client = HttpClient {
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
@@ -80,6 +80,7 @@ object AutoUpdater {
 
     // Download/install is platform-specific - no-op in commonMain
     fun downloadAndInstall(url: String) {
-        println("[AutoUpdater] downloadAndInstall not available on this platform. URL: $url")
+        println("[AutoUpdater] Opening download URL: $url")
+        SystemIntents.openUrl(url)
     }
 }

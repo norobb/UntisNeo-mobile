@@ -792,8 +792,9 @@ fun TimetableScreen(viewModel: UntisViewModel) {
                                                     Box(
                                                         modifier = Modifier
                                                             .fillMaxWidth()
+                                                            .then(if (viewModel.useLiquidGlassPref && !isCancelled) Modifier.blur(4.dp, edgeTreatment = androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded) else Modifier)
                                                             .background(
-                                                                if (isCancelled) Color(0x20FF0000) else colorFromHex.copy(alpha = 0.15f),
+                                                                if (isCancelled) Color(0x20FF0000) else colorFromHex.copy(alpha = 0.25f),
                                                                 RoundedCornerShape(8.dp)
                                                             )
                                                             .border(
@@ -858,11 +859,10 @@ fun TimetableScreen(viewModel: UntisViewModel) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        // Blur effect is not fully supported on all KMP targets natively without modifiers,
-                                        // so we use a translucent background to simulate "Liquid Glass"
+                                        .then(if (viewModel.useLiquidGlassPref && !isCancelled) Modifier.blur(8.dp, edgeTreatment = androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded) else Modifier)
                                         .background(
-                                            color = if (isCancelled) Color(0x20FF0000) else colorFromHex.copy(alpha = 0.15f),
-                                            shape = RoundedCornerShape(32.dp)
+                                            color = if (isCancelled) Color(0x20FF0000) else colorFromHex.copy(alpha = 0.25f),
+                                            shape = RoundedCornerShape(16.dp)
                                         )
                                         .border(
                                             width = 1.dp,
@@ -1516,13 +1516,27 @@ fun HomeworkScreen(viewModel: UntisViewModel) {
                                     color = if (hw.isDone) NothingMutedGray else NothingWhite,
                                     textDecoration = if (hw.isDone) TextDecoration.LineThrough else null
                                 )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = "Fällig bis: ${hw.dueDate}",
-                                    fontFamily = FontFamily.SansSerif,
-                                    fontSize = 12.sp,
-                                    color = NothingMutedGray
-                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                
+                                val isOverdue = false // Simplified
+                                val urgencyColor = if (hw.isDone) NothingMutedGray else if (isOverdue) NothingRed else Color(0xFFFFA500)
+                                
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.DateRange, 
+                                        contentDescription = null, 
+                                        tint = urgencyColor,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Fällig: ${hw.dueDate}",
+                                        fontFamily = FontFamily.SansSerif,
+                                        fontSize = 12.sp,
+                                        fontWeight = if (!hw.isDone) FontWeight.Bold else FontWeight.Normal,
+                                        color = urgencyColor
+                                    )
+                                }
                             }
 
                             IconButton(onClick = { viewModel.deleteHomeworkItem(hw) }) {
@@ -2308,18 +2322,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(StringResources.get("Sprache / Language"), fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, color = NothingMutedGray, fontSize = 11.sp, letterSpacing = 1.sp)
 
-                    SettingsToggleRow(
-                        title = "English UI",
-                        desc = StringResources.get("Wähle die App-Sprache aus"),
-                        checked = StringResources.currentLanguage.value == com.example.ui.AppLanguage.EN,
-                        onCheckedChange = { isEn ->
-                            StringResources.currentLanguage.value = if (isEn) com.example.ui.AppLanguage.EN else com.example.ui.AppLanguage.DE
-                        }
-                    )
-                    
-                    Divider(color = borderColor)
                     
                     SettingsToggleRow(
                         title = "Stock Android Theme",
