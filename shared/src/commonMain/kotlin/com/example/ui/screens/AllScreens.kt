@@ -2034,7 +2034,7 @@ fun ChatbotScreen(viewModel: UntisViewModel) {
                 ) {
                     // Custom style button to open real camera
                     Button(
-                        onClick = { cameraLauncher.launch(null) },
+                        onClick = { println("Kamera nicht verfügbar") },
                         colors = ButtonDefaults.buttonColors(containerColor = if (isDark) Color(0xFF1E1E1E) else Color(0xFFE2E8F0)),
                         shape = RoundedCornerShape(20.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
@@ -2044,7 +2044,7 @@ fun ChatbotScreen(viewModel: UntisViewModel) {
 
                     // Custom style button to choose from gallery
                     Button(
-                        onClick = { galleryLauncher.launch("image/*") },
+                        onClick = { println("Galerie nicht verfügbar") },
                         colors = ButtonDefaults.buttonColors(containerColor = if (isDark) Color(0xFF1E1E1E) else Color(0xFFE2E8F0)),
                         shape = RoundedCornerShape(20.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
@@ -2195,7 +2195,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                         Button(
                             onClick = {
                                 viewModel.triggerHomeworkTestAlert()
-                                Toast.makeText(context, "Hausaufgaben-Alert simuliert!", Toast.LENGTH_SHORT).show()
+                                println("Hausaufgaben-Alert simuliert!")
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = if (isDark) Color(0xFF1E1E1E) else Color(0xFFE2E8F0), contentColor = NothingWhite),
                             border = BorderStroke(1.dp, borderColor),
