@@ -50,20 +50,20 @@ jobs:
           cd iosApp/build
           mkdir -p Payload
           cp -r iosApp.xcarchive/Products/Applications/*.app Payload/
-          zip -r UntisNeo-iOS.ipa Payload
+          zip -r UntisNeo-mobile.ipa Payload
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: UntisNeo-iOS-IPA
-          path: iosApp/build/UntisNeo-iOS.ipa
+          name: UntisNeo-mobile-IPA
+          path: iosApp/build/UntisNeo-mobile.ipa
 
       - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: UntisNeo Latest Build
-          files: iosApp/build/UntisNeo-iOS.ipa
+          files: iosApp/build/UntisNeo-mobile.ipa
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
