@@ -4,10 +4,9 @@ import MainView
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import android.content.Context
+import androidx.appcompat.app.AppCompatActivity
 
-object AppGlobals {
-    var appContext: Context? = null
-}
+import com.example.utils.AppGlobals
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

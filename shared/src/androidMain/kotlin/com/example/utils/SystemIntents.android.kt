@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
-import com.myapplication.AppGlobals
+
 
 actual object SystemIntents {
     actual fun openUrl(url: String) {
