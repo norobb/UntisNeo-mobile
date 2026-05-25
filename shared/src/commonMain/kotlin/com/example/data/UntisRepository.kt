@@ -211,7 +211,7 @@ class UntisRepository(
         untisDao.clearLessons()
         untisDao.clearHomeworks()
         untisDao.clearMessages()
-        untisDao.clearMemos()
+        untisDao.clearEventMemos()
     }
     
     fun exportBackup(): String {

@@ -6,10 +6,7 @@ import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.header
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
+import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -47,8 +44,6 @@ data class SchoolSearchResult(
     val address: String,
     val serverUrl: String
 )
-
-import io.ktor.client.request.header
 
 @Serializable
 data class UntisClass(
