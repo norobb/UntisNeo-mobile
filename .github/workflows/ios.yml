@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -55,3 +57,13 @@ jobs:
         with:
           name: UntisNeo-iOS-IPA
           path: iosApp/build/UntisNeo-iOS.ipa
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: UntisNeo Latest Build
+          files: iosApp/build/UntisNeo-iOS.ipa
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
