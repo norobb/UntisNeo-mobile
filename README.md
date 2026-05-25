@@ -1,8 +1,8 @@
 # 🎓 UntisNeo
 
-> **Der modernste, native Android Stundenplan-Client mit "Liquid Glass" Design.**
+> **Der modernste, native Android Stundenplan-Client mit Blur Design.**
 
-UntisNeo ist eine revolutionäre Open-Source-Alternative zur klassischen Stundenplan-App. Sie verbindet ein atemberaubendes, transluzentes "Liquid Glass" Design mit künstlicher Intelligenz (Google Gemini) und echtem WebUntis-Hausaufgaben-Sync – exklusiv für Android!
+UntisNeo ist eine revolutionäre Open-Source-Alternative zur klassischen Stundenplan-App. Sie verbindet ein atemberaubendes, transluzentes Blur Design mit künstlicher Intelligenz (Google Gemini) und echtem WebUntis-Hausaufgaben-Sync – exklusiv für Android!
 
 <br>
 
@@ -18,7 +18,7 @@ UntisNeo ist eine revolutionäre Open-Source-Alternative zur klassischen Stunden
 ## ✨ Features
 
 - 📱 **Nativ & Performant**: Entwickelt in Jetpack Compose für ein extrem flüssiges und stabiles Android-Erlebnis.
-- 🎨 **UntisPlus "Liquid Glass" Design**: Wunderschöne, transluzente Unterrichtskarten mit echten nativen Unschärfe-Effekten (`Modifier.blur`), die sich dynamisch anpassen.
+- 🎨 **Blur Design**: Wunderschöne, transluzente Unterrichtskarten mit echten nativen Unschärfe-Effekten (`Modifier.blur`), die sich dynamisch anpassen.
 - 📚 **Echter Hausaufgaben-Sync**: Zieht (im Gegensatz zu anderen Third-Party-Clients) echte Hausaufgaben direkt über die JSON-RPC API aus WebUntis, inklusive Dringlichkeits-Badges und Icons.
 - 🤖 **Neo Smart-Assistant (Gemini)**: Integrierter KI-Chatbot, der deinen Stundenplan versteht. Frage nach Hausaufgaben, Vertretungen oder lade Fotos deiner Aufgabenblätter hoch!
 - 🔄 **Smart Background Sync**: Überprüft den Stundenplan automatisch im Hintergrund. Du erhältst nur dann eine Push-Benachrichtigung, wenn wirklich etwas ausfällt oder verschoben wird.
@@ -46,6 +46,10 @@ Das Projekt nutzt **Jetpack Compose**.
 # Android Debug APK bauen
 ./gradlew assembleDebug
 ```
+
+## 🤝 Credits
+
+Ein besonderer Dank geht an das [UntisPlus](https://github.com/lucas-m20/UntisPlus) Projekt, welches als starke Inspiration für das UI-Konzept dieser App gedient hat!
 
 ---
 *Disclaimer: UntisNeo ist ein inoffizieller Client und steht in keiner Verbindung zur Untis GmbH.*

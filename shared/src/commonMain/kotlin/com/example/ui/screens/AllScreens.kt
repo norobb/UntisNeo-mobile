@@ -855,7 +855,7 @@ fun TimetableScreen(viewModel: UntisViewModel) {
                                 val isCancelled = lesson.status == "CANCELLED"
                                 val isSubstituted = lesson.status == "SUBSTITUTION"
                                 
-                                // UntisPlus Liquid Glass Card Design
+                                // Blur Card Design
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -2369,7 +2369,7 @@ fun SettingsScreen(viewModel: UntisViewModel) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("LIQUID GLASS (iOS STYLE)", fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, color = NothingMutedGray, fontSize = 11.sp, letterSpacing = 1.sp)
+                    Text("BLUR EFFEKTE", fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, color = NothingMutedGray, fontSize = 11.sp, letterSpacing = 1.sp)
                     
                     SettingsToggleRow(
                         title = "Blur Effekte aktivieren",
